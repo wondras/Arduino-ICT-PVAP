@@ -50,6 +50,8 @@ class CAsteroidsBaseGame : public CGame
     
     //Active High
     static const UINT32 s_ACT_Hi = 0x00;
+    //Active Low
+    static const UINT32 s_ACT_Lo = 0x01;
 
         //
         // CAsteroidsBaseGame
@@ -60,6 +62,9 @@ class CAsteroidsBaseGame : public CGame
         CAsteroidsBaseGame(
             const bool          clockMaster,
             const ROM_REGION    *romRegion,
+            const RAM_REGION    *ramRegion,
+            const RAM_REGION    *ramRegionByteOnly,
+            const RAM_REGION    *ramRegionWriteOnly,
             const INPUT_REGION  *inputRegion,
             const OUTPUT_REGION *outputRegion
         );
