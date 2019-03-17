@@ -256,6 +256,66 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
     {0}
 }; // end of list
 
+//
+// Custom functions implemented for this game.
+//
+static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {
+    //                                         "0123456789"
+    {CAsteroidsDeluxeGame::pokeyIdle,          "PKY Idle  "},
+    {CAsteroidsDeluxeGame::pokeySoundTest,     "PKY Sound "},
+    {CAsteroidsDeluxeGame::pokeySwitchTest,    "PKY Switch"},
+    {CAsteroidsDeluxeGame::pokeyRandomTest,    "PKY Random"},
+    {NO_CUSTOM_FUNCTION} // end of list
+};
+
+PERROR
+CAsteroidsDeluxeGame::pokeyIdle(
+                                void *cAsteroidsDeluxeGame
+                                )
+{
+    CAsteroidsDeluxeGame *pThis = (CAsteroidsDeluxeGame *) cAsteroidsDeluxeGame;
+    PERROR error = errorSuccess;
+    
+    error = pThis->m_pokey->idle();
+    return error;
+}
+
+PERROR
+CAsteroidsDeluxeGame::pokeySoundTest(
+                                void *cAsteroidsDeluxeGame
+                                )
+{
+    CAsteroidsDeluxeGame *pThis = (CAsteroidsDeluxeGame *) cAsteroidsDeluxeGame;
+    PERROR error = errorSuccess;
+    
+    error = pThis->m_pokey->soundCheck();
+    return error;
+}
+
+PERROR
+CAsteroidsDeluxeGame::pokeySwitchTest(
+                                void *cAsteroidsDeluxeGame
+                                )
+{
+    CAsteroidsDeluxeGame *pThis = (CAsteroidsDeluxeGame *) cAsteroidsDeluxeGame;
+    PERROR error = errorSuccess;
+    
+    error = pThis->m_pokey->readSwitches();
+    return error;
+}
+
+PERROR
+CAsteroidsDeluxeGame::pokeyRandomTest(
+                                void *cAsteroidsDeluxeGame
+                                )
+{
+    CAsteroidsDeluxeGame *pThis = (CAsteroidsDeluxeGame *) cAsteroidsDeluxeGame;
+    PERROR error = errorSuccess;
+    
+    error = pThis->m_pokey->readRandom();
+    return error;
+}
+
 IGame*
 CAsteroidsDeluxeGame::createInstanceSet3(
 )
@@ -307,8 +367,15 @@ CAsteroidsDeluxeGame::CAsteroidsDeluxeGame(
                                                       s_ramRegionByteOnly,
                                                       s_ramRegionWriteOnly,
                                                       s_inputRegion,
-                                                      s_outputRegion )
+                                                      s_outputRegion,
+                                                      s_customFunction )
 {
+    m_pokey = new CPOKEY(m_cpu, 0x02000);
 }
 
-
+CAsteroidsDeluxeGame::~CAsteroidsDeluxeGame(
+)
+{
+    delete m_pokey;
+    m_pokey = (CPOKEY *) NULL;
+}

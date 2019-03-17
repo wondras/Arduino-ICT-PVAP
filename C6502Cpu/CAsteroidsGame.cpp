@@ -252,6 +252,14 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
     {0}
 }; // end of list
 
+//
+// Custom functions implemented for this game.
+//
+static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {
+    //                                         "0123456789"
+    {NO_CUSTOM_FUNCTION} // end of list
+};
+
 IGame*
 CAsteroidsGame::createInstanceSet4(
 )
@@ -303,7 +311,8 @@ CAsteroidsGame::CAsteroidsGame(
                                                       s_ramRegionByteOnly,
                                                       s_ramRegionWriteOnly,
                                                       s_inputRegion,
-                                                      s_outputRegion )
+                                                      s_outputRegion,
+                                                      s_customFunction)
 {
 }
 

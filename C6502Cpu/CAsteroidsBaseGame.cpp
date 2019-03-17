@@ -45,13 +45,7 @@
 //BUS CHECK
 //E:D0 ff 6c
 
-//
-// Custom functions implemented for this game.
-//
-static const CUSTOM_FUNCTION s_customFunction[] PROGMEM = {
-    //                                         "0123456789"
-    {NO_CUSTOM_FUNCTION}
-}; // end of list
+
 
 CAsteroidsBaseGame::CAsteroidsBaseGame(
     const bool          clockMaster,
@@ -60,14 +54,15 @@ CAsteroidsBaseGame::CAsteroidsBaseGame(
     const RAM_REGION    *ramRegionByteOnly,
     const RAM_REGION    *ramRegionWriteOnly,
     const INPUT_REGION  *inputRegion,
-    const OUTPUT_REGION *outputRegion
+    const OUTPUT_REGION *outputRegion,
+    const CUSTOM_FUNCTION *customFunction
 ) : CGame( romRegion,
            ramRegion,
            ramRegionByteOnly,
            ramRegionWriteOnly,
            inputRegion,
            outputRegion,
-           s_customFunction )
+           customFunction )
 {
     if (clockMaster)
     {

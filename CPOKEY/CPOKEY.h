@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2017, Phillip Riscombe-Burton
+// Copyright (c) 2019 Warren Ondras
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without modification,
@@ -22,71 +22,65 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CAsteroidsDeluxeGame_h
-#define CAsteroidsDeluxeGame_h
-#include "CAsteroidsBaseGame.h"
-#include "CPOKEY.h"
+#ifndef CPOKEY_h
+#define CPOKEY_h
+
+#include "ICpu.h"
 
 
-class CAsteroidsDeluxeGame : public CAsteroidsBaseGame
+//
+// Implementation for testing Atari C012294 "POKEY" sound and I/O ICs.
+// The device is mapped to a base address by the game hardware, and has four
+// address bits used to read/write 16 registers.
+//
+class CPOKEY
 {
     public:
 
-        //
-        // Constructors for this game.
-        //
-
-        static IGame* createInstanceSet3();
-        static IGame* createInstanceClockMasterSet3();
-        static IGame* createInstanceSet2();
-        static IGame* createInstanceClockMasterSet2();
-        static IGame* createInstanceSet1();
-        static IGame* createInstanceClockMasterSet1();
-
-        //
-        // Custom functions for Asteroids Deluxe only
-        //
-        static PERROR pokeyIdle(
-            void *cAsteroidsDeluxeGame
+        CPOKEY(
+            ICpu   *cpu,
+            UINT32 regAddress
         );
 
-        static PERROR pokeySoundTest(
-            void *cAsteroidsDeluxeGame
+        ~CPOKEY(
         );
 
-        static PERROR pokeySwitchTest(
-            void *cAsteroidsDeluxeGame
+        PERROR idle(
+        );
+
+        PERROR soundCheck(
         );
     
-        static PERROR pokeyRandomTest(
-            void *cAsteroidsDeluxeGame
+        PERROR readSwitches(
+        );
+    
+        PERROR readRandom(
         );
 
-        //
-        // IGame Interface - wholly implemented in the Base game.
-        //
-    
-        static ROM_REGION getAstDlxRomset3();
-        static ROM_REGION getAstDlxRomset2();
-        static ROM_REGION getAstDlxRomset1();
+    private:
 
-    protected:
-        ~CAsteroidsDeluxeGame(
+        PERROR read(
+            UINT8 reg,
+            UINT8 *data
+        );
+
+        PERROR write(
+            UINT8 reg,
+            UINT8 data
+        );
+
+        PERROR playTone(
+            UINT8 freqReg,
+            UINT8 ctrlReg,
+            UINT8 freqency,
+            UINT32 duration
         );
     
     private:
 
-        //
-        // Different ROM sets supplied.
-        //
-        CAsteroidsDeluxeGame(
-            const bool       clockMaster,
-            const ROM_REGION *romRegion
-        );
-
-        CPOKEY *m_pokey;
+        ICpu    *m_cpu;
+        UINT32  m_baseAddress;
 };
 
 #endif
-
 

@@ -1,6 +1,7 @@
 //
-// Copyright (c) 2017, Phillip Riscombe-Burton
+// Copyright (c) 2019, Warren Ondras
 // All rights reserved.
+// adapted from Asteroids support files by Phillip Riscombe-Burton
 //
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -22,13 +23,13 @@
 // TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef CAsteroidsBaseGame_h
-#define CAsteroidsBaseGame_h
+#ifndef CAtariAVGBaseGame_h
+#define CAtariAVGBaseGame_h
 
 #include "CGame.h"
 
 
-class CAsteroidsBaseGame : public CGame
+class CAtariAVGBaseGame : public CGame
 {
     public:
     
@@ -48,29 +49,24 @@ class CAsteroidsBaseGame : public CGame
     
     static const UINT32 s_MSK_ALL = 0xFF;
     
-    //Active High
+    //Active High and Active Low
     static const UINT32 s_ACT_Hi = 0x00;
-    //Active Low
     static const UINT32 s_ACT_Lo = 0x01;
 
         //
-        // CAsteroidsBaseGame
+        // CAtariAVGBaseGame
         //
     
     protected:
 
-        CAsteroidsBaseGame(
+        CAtariAVGBaseGame(
             const bool          clockMaster,
             const ROM_REGION    *romRegion,
-            const RAM_REGION    *ramRegion,
-            const RAM_REGION    *ramRegionByteOnly,
-            const RAM_REGION    *ramRegionWriteOnly,
             const INPUT_REGION  *inputRegion,
-            const OUTPUT_REGION *outputRegion,
-            const CUSTOM_FUNCTION *customFunction
+            const OUTPUT_REGION *outputRegion
         );
 
-        ~CAsteroidsBaseGame(
+        ~CAtariAVGBaseGame(
         );
 
 };
