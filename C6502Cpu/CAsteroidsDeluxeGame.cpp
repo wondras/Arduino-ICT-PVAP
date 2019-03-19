@@ -23,6 +23,8 @@
 // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 #include "CAsteroidsDeluxeGame.h"
+#include "PinMap.h"
+#include "6502PinDescription.h"
 
 static const UINT32 s_ROM_2716_SIZE = 0x0800; //2KB - 2048 bytes - 0x800 in hex
 
@@ -370,7 +372,8 @@ CAsteroidsDeluxeGame::CAsteroidsDeluxeGame(
                                                       s_outputRegion,
                                                       s_customFunction )
 {
-    m_pokey = new CPOKEY(m_cpu, 0x02000);
+    m_pokeyClk = new CFastPin(g_pinMap40DIL, &s_CLK2o_o);
+    m_pokey = new CPOKEY(m_cpu, 0x02000, m_pokeyClk);
 }
 
 CAsteroidsDeluxeGame::~CAsteroidsDeluxeGame(

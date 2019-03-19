@@ -27,7 +27,7 @@
 #define CAtariAVGBaseGame_h
 
 #include "CGame.h"
-
+#include "CPOKEY.h"
 
 class CAtariAVGBaseGame : public CGame
 {
@@ -53,6 +53,25 @@ class CAtariAVGBaseGame : public CGame
     static const UINT32 s_ACT_Hi = 0x00;
     static const UINT32 s_ACT_Lo = 0x01;
 
+    //
+    // Custom functions for POKEY tests
+    //
+    static PERROR pokeyIdle(
+                            void *cAtariAVGBaseGame
+                            );
+
+    static PERROR pokeySoundTest(
+                                 void *cAtariAVGBaseGame
+                                 );
+
+    static PERROR pokeySwitchTest(
+                                  void *cAtariAVGBaseGame
+                                  );
+
+    static PERROR pokeyRandomTest(
+                                  void *cAtariAVGBaseGame
+                                  );
+
         //
         // CAtariAVGBaseGame
         //
@@ -63,12 +82,16 @@ class CAtariAVGBaseGame : public CGame
             const bool          clockMaster,
             const ROM_REGION    *romRegion,
             const INPUT_REGION  *inputRegion,
-            const OUTPUT_REGION *outputRegion
+            const OUTPUT_REGION *outputRegion,
+            const UINT32        pokeyAddress
         );
 
         ~CAtariAVGBaseGame(
         );
 
+    private:
+        CPOKEY *m_pokey;
+        CFastPin *m_clkPin;
 };
 
 #endif

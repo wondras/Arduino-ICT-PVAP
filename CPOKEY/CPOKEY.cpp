@@ -25,6 +25,11 @@
 #include "CPOKEY.h"
 #include "types.h"
 
+
+// TO-DO:
+//   more consistent checking of 'error' return values
+
+
 // POKEY has 16 addresses, read and write functions are different
 
 // WRITE REGISTERS
@@ -64,17 +69,20 @@ static const UINT8 POKEY_R_IRQSTAT   = 0xE;
 static const UINT8 POKEY_R_NMIST     = 0xF;
 
 // clock divider values for test tones
-static const UINT8 POKEY_FREQ_LOW_C      = 0xF3;
-static const UINT8 POKEY_FREQ_MID_C      = 0x79;
-static const UINT8 POKEY_FREQ_HIGH_C     = 0x3C;
-static const UINT8 POKEY_FREQ_HIGHER_C  = 0x1D;
+// (these are very small because the test clock signal is much slower than the normal one)
+static const UINT8 POKEY_FREQ_LOW      =  0x61;
+static const UINT8 POKEY_FREQ_MID      =  0x30;
+static const UINT8 POKEY_FREQ_HIGH     =  0x17;
+static const UINT8 POKEY_FREQ_HIGHER   =  0x0B;
 
 CPOKEY::CPOKEY(
     ICpu   *cpu,
-    UINT32 baseAddress
+    UINT32 baseAddress,
+    CFastPin *clockPin
 ) : m_cpu(cpu),
     m_baseAddress(baseAddress)
 {
+    m_clockPin = clockPin;
 }
 
 
@@ -86,6 +94,9 @@ CPOKEY::~CPOKEY(
 
 //
 // Return to a reasonable default state. (POKEY has no reset state, so this is not exact)
+//
+// (The POKEY chip seems to stop working correctly when it sits idle with no clock signal for
+// a minute or so. We need to call idle() before running any tests, as this seems to wake it up.)
 //
 PERROR
 CPOKEY::idle(
@@ -101,7 +112,7 @@ CPOKEY::idle(
     // 0xC undefined   NO WRITE
     // 0xD SEROUT      0x00 (ensures serial line goes high)
     // 0xE IRQEN       0x00
-    // 0xF SKCTL       0x00
+    // 0xF SKCTL       0x00 (enables init mode)
 
     for (UINT8 reg = 0 ; reg < 16 ; reg++)
     {
@@ -115,6 +126,8 @@ CPOKEY::idle(
             }
         }
     }
+    write(POKEY_W_SKCTL, 0x03); // disable init
+    m_clockPin->doClocks(1000); // in case the chip needs to 'settle'
     return error;
 }
 
@@ -127,21 +140,25 @@ CPOKEY::soundCheck(
 )
 {
     PERROR error = errorSuccess;
-    static const UINT32 DURATION = 1000; // millliseconds for test tone
-
-    error = playTone(POKEY_W_AUDF1, POKEY_W_AUDC1, POKEY_FREQ_LOW_C, DURATION);
+ 
+    error = idle();
+ 
+    static const UINT32 onDuration = 500000; // clock cycles for test tone
+    static const UINT32 offDuration = 250000; // clock cycles between test tones
+    error = playTone(POKEY_W_AUDF1, POKEY_W_AUDC1, POKEY_FREQ_LOW, onDuration);
     if (SUCCESS(error)) {
-        delay(DURATION/2);
-        error = playTone(POKEY_W_AUDF2, POKEY_W_AUDC2, POKEY_FREQ_MID_C, DURATION);
+        m_clockPin->doClocks(offDuration);
+        error = playTone(POKEY_W_AUDF2, POKEY_W_AUDC2, POKEY_FREQ_MID, onDuration);
         if (SUCCESS(error)) {
-            delay(DURATION/2);
-            error = playTone(POKEY_W_AUDF3, POKEY_W_AUDC3, POKEY_FREQ_HIGH_C, DURATION);
+            m_clockPin->doClocks(offDuration);
+            error = playTone(POKEY_W_AUDF3, POKEY_W_AUDC3, POKEY_FREQ_HIGH, onDuration);
             if (SUCCESS(error)) {
-                delay(DURATION/2);
-                error = playTone(POKEY_W_AUDF4, POKEY_W_AUDC4, POKEY_FREQ_HIGHER_C, DURATION);
+                m_clockPin->doClocks(offDuration);
+                error = playTone(POKEY_W_AUDF4, POKEY_W_AUDC4, POKEY_FREQ_HIGHER, onDuration);
             }
         }
     }
+    m_clockPin->doClocks(1000); // in case the chip needs to 'settle'
     return error;
 }
 
@@ -154,7 +171,10 @@ CPOKEY::readSwitches(
 {
     UINT8 switchValues;
     PERROR error = errorSuccess;
-    //   set D2 of POKEY_W_SKCTL
+    
+    error = idle();
+    
+    //   set D2 of POKEY_W_SKCTL (fast pot mode)
     error = write(POKEY_W_SKCTL, 0x04);
     if SUCCESS(error)
     {
@@ -163,7 +183,7 @@ CPOKEY::readSwitches(
         if SUCCESS(error)
         {
             //   wait at least 4 clocks
-            delayMicroseconds(10);
+            m_clockPin->doClocks(100);
             //   read POKEY_R_ALLPOT
             error = read(POKEY_R_ALLPOT, &switchValues);
         }
@@ -186,21 +206,21 @@ PERROR
 CPOKEY::readRandom(
 )
 {
-    static const int readDelayMicros = 100;
+    static const UINT32 rndDelayClocks = 100;
     UINT8 randomValue1, randomValue2, randomValue3;
     PERROR error = errorSuccess;
 
-    //  set timer / polynomial params?
+    error = idle();
 
     // read POKEY_R_RANDOM three times
     error = read(POKEY_R_RANDOM, &randomValue1);
     if SUCCESS(error)
     {
         error = read(POKEY_R_RANDOM, &randomValue2);
-        delay(readDelayMicros);
+        m_clockPin->doClocks(rndDelayClocks);
         if SUCCESS(error)
         {
-            delay(readDelayMicros);
+            m_clockPin->doClocks(rndDelayClocks);
             error = read(POKEY_R_RANDOM, &randomValue3);
         }
     }
@@ -236,12 +256,13 @@ CPOKEY::playTone(
 )
 {
     PERROR error = errorSuccess;
-    error = write(freqReg, freqency);
+    error = write(ctrlReg, 0xAF); // set max volume
+    error = write(freqReg, freqency); // set freq divider
     if (SUCCESS(error))
     {
-  //      error = write(ctrlReg, 0x00);  // probably not needed
-        delay(duration);
-        error = write(freqReg, 0x00);
+        m_clockPin->doClocks(duration); // let the music play
+        error = write(freqReg, 0x00); // disable freq divider
+        error = write(ctrlReg, 0xA0); // set min volume
     }
     return error;
 }
@@ -252,7 +273,7 @@ CPOKEY::playTone(
 //  serial I/O
 //  Timer
 //  IRQ
-//   NMI
+//  NMI
 
 
 

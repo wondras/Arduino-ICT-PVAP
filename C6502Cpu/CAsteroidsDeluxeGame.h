@@ -83,8 +83,9 @@ class CAsteroidsDeluxeGame : public CAsteroidsBaseGame
             const bool       clockMaster,
             const ROM_REGION *romRegion
         );
-
+    
         CPOKEY *m_pokey;
+        CFastPin *m_pokeyClk;
 };
 
 #endif

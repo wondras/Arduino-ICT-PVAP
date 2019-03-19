@@ -81,30 +81,6 @@ static const ROM_REGION s_romRegionSet1[] PROGMEM = {
 ROM_REGION CBattlezoneGame::getBZRomset2(){ return *s_romRegionSet2; }
 ROM_REGION CBattlezoneGame::getBZRomset1(){ return *s_romRegionSet1; }
 
-
-// INPUTS AND OUTPUTS ARE TOTALLY WRONG
-// (left over from Asteroids; need to be updated)
-
-//INPUT
-//2001 D7 3KHz - R
-//2002 D7 HALT - R
-//2003 D7 Hyperspace SW - R
-//2004 D7 Fire - R
-//2005 D7 Diag step - R
-//2006 D7 Slam sw - R
-//2007 D7 Self test sw - R
-
-//2400 D7 Left coin SW - R
-//2401 D7 Center coin SW - R
-//2402 D7 Right coin SW - R
-//2403 D7 1 Player start - R
-//2404 D7 2 Player start - R
-//2405 D7 Thrust - R
-//2406 D7 ROT right - R
-//2407 D7 ROT left - R
-
-//2800 - 2803 D0,D1 - R OPT switches SW1 -> SW8 - R
-
 //
 // Input region is the same for all ROM versions.
 //
@@ -128,35 +104,6 @@ static const INPUT_REGION s_inputRegion[] PROGMEM = {
     {0}
 }; // end of list
 
-//OUTPUT
-
-//3000 -> 00000000 DMAGO - W
-
-//3200 -> D0 2 PLAYER LAMP - W
-//3200 -> D1 1 PLAYER LAMP - W
-//3200 -> D2 RAMSEL - W
-//3200 -> D3 COIN CNTRL LEFT - W
-//3200 -> D4 COIN CNTRL MIDDLE - W
-//3200 -> D5 COIN CNTRL RIGHT - W
-
-//3400 -> 00000000 WDCLR - W
-
-//3600 -> D6,D7 EXPLOSION PITCH - W
-//3600 -> D2->D5 EXPLOSION VOLUME - W
-
-//3A00 -> D4 - THUMP VOLUME - W
-//3A00 -> D0->D3 - THUMP FREQ - W
-
-//3C00 -> D7 - SAUCER SND - W
-//3C01 -> D7 - SAUCER FIRE SND - W
-//3C02 -> D7 - SAUCER SND SELECT - W
-//3C03 -> D7 - SHIP THRUST SND - W
-//3C04 -> D7 - SHIP FIRE SND - W
-//3C05 -> D7 - LIFE SND - W
-
-//3E00 -> 00000000 NOISE RESET - W
-
-
 //
 // Output region is the same for all ROM versions.
 //
@@ -177,11 +124,10 @@ static const OUTPUT_REGION s_outputRegion[] PROGMEM = { //                      
     {0}
 }; // end of list
 
-// TO-DO: Custom functions for
-//     - POKEY analog inputs
-//     - POKEY matrix inputs
-//     - POKEY sound outputs
-//     - AM2901 bit slice tests
+// RB and BZ have different addresses for the POKEY chip
+static const UINT32 s_pokeyAddress = 0x1820;
+
+// TO-DO: Custom functions for AM2901 bit slice tests
 
 IGame*
 CBattlezoneGame::createInstanceSet2(
@@ -217,7 +163,8 @@ CBattlezoneGame::CBattlezoneGame(
    ) : CAtariAVGBaseGame( clockMaster,
                           romRegion,
                           s_inputRegion,
-                          s_outputRegion )
+                          s_outputRegion,
+                          s_pokeyAddress)
 {
 }
 

@@ -26,6 +26,7 @@
 #define CPOKEY_h
 
 #include "ICpu.h"
+#include "CFastPin.h"
 
 
 //
@@ -39,7 +40,8 @@ class CPOKEY
 
         CPOKEY(
             ICpu   *cpu,
-            UINT32 regAddress
+            UINT32 regAddress,
+            CFastPin *clockPin
         );
 
         ~CPOKEY(
@@ -80,6 +82,7 @@ class CPOKEY
 
         ICpu    *m_cpu;
         UINT32  m_baseAddress;
+        CFastPin *m_clockPin;
 };
 
 #endif
